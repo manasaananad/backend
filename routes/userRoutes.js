@@ -1,1 +1,27 @@
+router.post("/register", async (req, res) => {
+  try {
+    const user = new User(req.body);
+    await user.save();
 
+    // 🔥 NON-BLOCKING EMAIL
+    transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: "🚀 New User Registered",
+      text: `
+Name: ${user.name}
+Email: ${user.email}
+Phone: ${user.phone}
+Interest: ${user.interest}
+`
+    })
+    .then(() => console.log("Email sent"))
+    .catch(err => console.log("Email error:", err));
+
+    res.json({ message: "User saved successfully ✅" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
